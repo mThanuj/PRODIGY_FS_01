@@ -12,6 +12,6 @@ router.use(authenticateToken);
 
 router.get('/:id', getTasks);
 router.post('/create-task', isAdmin, createTask);
-router.put('/complete-task/:id', completeTask);
+router.patch('/complete-task/:id', completeTask);
 
 export default router;

@@ -18,11 +18,14 @@ const ViewTasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axiosInstance.get(`/tasks/${user.id}`);
+        const response = await axiosInstance.get<{ tasks: Task[] }>(
+          `/tasks/${user.id}`,
+        );
         setTasks(response.data.tasks);
       } catch (err) {
         console.error('Error fetching tasks:', err);
@@ -34,6 +37,27 @@ const ViewTasks: React.FC = () => {
 
     fetchTasks();
   }, [user.id]);
+
+  const completeTask = async (taskId: string) => {
+    if (updatingIds.has(taskId)) return;
+
+    setUpdatingIds((prev) => new Set(prev).add(taskId));
+    try {
+      await axiosInstance.patch(`/tasks/complete-task/${taskId}`);
+      setTasks((prev) =>
+        prev.map((t) => (t._id === taskId ? { ...t, isDone: true } : t)),
+      );
+    } catch (err) {
+      console.error(`Error completing task ${taskId}:`, err);
+      alert('Failed to complete task. Please try again.');
+    } finally {
+      setUpdatingIds((prev) => {
+        const copy = new Set(prev);
+        copy.delete(taskId);
+        return copy;
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -88,17 +112,37 @@ const ViewTasks: React.FC = () => {
                       {task.isDone ? 'Completed' : 'Pending'}
                     </span>
                   </div>
-                  <div className="mt-4 flex justify-between text-sm text-gray-500">
-                    <span>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <span className="text-sm text-gray-500">
                       {new Date(task.createdAt).toLocaleDateString('en-IN', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
-                        minute: '2-digit',
                         hour: '2-digit',
+                        minute: '2-digit',
                         second: '2-digit',
                       })}
                     </span>
+
+                    {!task.isDone && (
+                      <button
+                        onClick={() => completeTask(task._id)}
+                        disabled={updatingIds.has(task._id)}
+                        className={`
+                          ml-4 px-4 py-2 rounded-lg text-white font-medium transition
+                          ${
+                            updatingIds.has(task._id)
+                              ? 'bg-gray-400 cursor-not-allowed'
+                              : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-300'
+                          }
+                        `}
+                      >
+                        {updatingIds.has(task._id)
+                          ? 'Completing...'
+                          : 'Mark as Complete'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </li>

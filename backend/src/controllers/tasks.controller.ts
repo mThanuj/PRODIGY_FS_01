@@ -44,20 +44,15 @@ export const createTask = async (req: Request, res: Response) => {
 export const completeTask = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { id: userId, role } = req.user as { id: string; role: string };
-
-    if (role !== 'admin' && userId !== id) {
-      res
-        .status(403)
-        .json({ error: 'You are not authorized to complete this task' });
-      return;
-    }
+    const { userId, role } = req.user as { userId: string; role: string };
 
     const task: ITask | null = await Task.findById({ _id: id, user: userId });
     if (!task) {
       res.status(404).json({ error: 'Task not found' });
       return;
     }
+
+    console.log('done', role, userId, task);
 
     task.isDone = true;
     await task.save();
