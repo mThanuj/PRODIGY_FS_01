@@ -14,7 +14,11 @@ const Middleware = () => {
   const isViewTasksPage = path === '/view-tasks';
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [role, setRole] = useState<string | null>(null);
+  const [user, setUser] = useState<{
+    email: string;
+    id: string;
+    role: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +28,9 @@ const Middleware = () => {
         const isAuth = response.status !== 401;
 
         if (isAuth) {
-          setRole(response.data.user.role);
+          console.log(response.data.user);
+          const { email, userId: id, role } = response.data.user;
+          setUser({ email, id, role });
         }
 
         setIsAuthenticated(isAuth);
@@ -48,19 +54,19 @@ const Middleware = () => {
       return <Navigate to="/" replace />;
     }
 
-    if (isAssignTaskPage && role !== 'admin') {
+    if (isAssignTaskPage && user?.role !== 'admin') {
       return <Navigate to="/" replace />;
     }
 
-    if (isViewTasksPage && role !== 'user') {
+    if (isViewTasksPage && user?.role !== 'user') {
       return <Navigate to="/" replace />;
     }
 
     if (isHomePage) {
-      if (role === 'admin') {
+      if (user?.role === 'admin') {
         return <Navigate to="/assign-task" replace />;
       }
-      if (role === 'user') {
+      if (user?.role === 'user') {
         return <Navigate to="/view-tasks" replace />;
       }
     }
@@ -70,7 +76,7 @@ const Middleware = () => {
     return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />;
+  return <Outlet context={{ user }} />;
 };
 
 export default Middleware;
