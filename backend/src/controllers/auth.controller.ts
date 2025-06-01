@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import User from '../models/user.model';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import config from '../config/config';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -56,6 +58,24 @@ export const login = async (req: Request, res: Response) => {
       res.status(401).json({ error: 'Invalid email or password' });
       return;
     }
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        role: user.role,
+      },
+      config.JWT_SECRET,
+      {
+        expiresIn: '24h',
+      },
+    );
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: config.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     res.status(200).json({ message: 'Login successful' });
   } catch (error) {
