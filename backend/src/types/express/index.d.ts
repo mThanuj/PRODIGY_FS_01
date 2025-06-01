@@ -1,9 +1,9 @@
-import { User } from '../types/User';
-
 declare global {
   namespace Express {
     interface Request {
-      user?: User;
+      user?: string | import('jsonwebtoken').JwtPayload | undefined;
     }
   }
 }
+
+export {};
