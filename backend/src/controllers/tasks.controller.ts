@@ -40,3 +40,25 @@ export const createTask = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Error creating task' });
   }
 };
+
+export const completeTask = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { userId, role } = req.user as { userId: string; role: string };
+
+    const task: ITask | null = await Task.findById({ _id: id, user: userId });
+    if (!task) {
+      res.status(404).json({ error: 'Task not found' });
+      return;
+    }
+
+    console.log('done', role, userId, task);
+
+    task.isDone = true;
+    await task.save();
+    res.status(200).json({ task });
+  } catch (error) {
+    console.error('Error completing task:', error);
+    res.status(500).json({ error: 'Error completing task' });
+  }
+};
