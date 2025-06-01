@@ -37,4 +37,29 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {};
+export const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      res.status(400).json({ error: 'Email and password are required' });
+      return;
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(401).json({ error: 'Invalid email or password' });
+      return;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      res.status(401).json({ error: 'Invalid email or password' });
+      return;
+    }
+
+    res.status(200).json({ message: 'Login successful' });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ error: 'Error logging in' });
+  }
+};
