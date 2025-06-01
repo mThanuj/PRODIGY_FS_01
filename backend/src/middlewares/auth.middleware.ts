@@ -27,3 +27,23 @@ export const authenticateToken = async (
     },
   );
 };
+
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user;
+
+  if (!user) {
+    res.sendStatus(403);
+    return;
+  }
+
+  if (user instanceof String) {
+    res.sendStatus(403);
+    return;
+  }
+
+  if (user instanceof Object && user.role === 'admin') {
+    next();
+  } else {
+    res.sendStatus(403);
+  }
+};

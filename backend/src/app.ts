@@ -21,8 +21,10 @@ app.get('/', (_req: Request, res: Response) => {
 
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
+import taskRoutes from './routes/task.routes';
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/tasks', taskRoutes);
 
 export default app;
