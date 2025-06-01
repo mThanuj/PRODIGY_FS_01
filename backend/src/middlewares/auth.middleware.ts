@@ -8,7 +8,6 @@ export const authenticateToken = async (
   next: NextFunction,
 ) => {
   const token = req.cookies.token;
-  console.log(token);
 
   if (!token) {
     res.sendStatus(401);

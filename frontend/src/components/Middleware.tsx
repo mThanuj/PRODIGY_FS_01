@@ -6,7 +6,9 @@ const Middleware = () => {
   const location = useLocation();
   const path = location.pathname;
 
-  const isLoginPage = path === '/login';
+  const authenticationPages = ['/login', '/register'];
+
+  const isLoginOrRegisterPage = authenticationPages.includes(path);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [role, setRole] = useState<string | null>(null);
@@ -15,7 +17,7 @@ const Middleware = () => {
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
-        const response = await axiosInstance.get('/api/v1/auth/check-auth');
+        const response = await axiosInstance.get('/auth/check-auth');
         const isAuthenticated = response.status !== 401;
 
         if (isAuthenticated) {
@@ -33,17 +35,15 @@ const Middleware = () => {
     checkAuthentication();
   }, []);
 
-  console.log(role);
-
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (isAuthenticated && isLoginPage) {
+  if (isAuthenticated && isLoginOrRegisterPage) {
     return <Navigate to="/" replace />;
   }
 
-  if (!isAuthenticated && !isLoginPage) {
+  if (!isAuthenticated && !isLoginOrRegisterPage) {
     return <Navigate to="/login" replace />;
   }
 
