@@ -1,13 +1,23 @@
-FROM node:18-alpine
+# Use Node 20 to match engine requirements (important for packages like react-router@7+)
+FROM node:20-alpine
 
+# Install pnpm globally
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Set working directory
 WORKDIR /usr/backend/dev
 
-COPY package.json ./
+# Copy only package manager files first (for layer caching)
+COPY package.json pnpm-lock.yaml ./
 
-RUN npm install
+# Install dependencies using pnpm
+RUN pnpm install
 
+# Copy remaining app files
 COPY . .
 
+# Expose app port
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# Start development server
+CMD ["pnpm", "dev"]
