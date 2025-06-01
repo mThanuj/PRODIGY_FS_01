@@ -8,7 +8,10 @@ const Middleware = () => {
 
   const authenticationPages = ['/login', '/register'];
 
+  const isHomePage = path === '/';
   const isLoginOrRegisterPage = authenticationPages.includes(path);
+  const isAssignTaskPage = path === '/assign-task';
+  const isViewTasksPage = path === '/view-tasks';
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [role, setRole] = useState<string | null>(null);
@@ -18,15 +21,16 @@ const Middleware = () => {
     const checkAuthentication = async () => {
       try {
         const response = await axiosInstance.get('/auth/check-auth');
-        const isAuthenticated = response.status !== 401;
+        const isAuth = response.status !== 401;
 
-        if (isAuthenticated) {
+        if (isAuth) {
           setRole(response.data.user.role);
         }
 
-        setIsAuthenticated(isAuthenticated);
+        setIsAuthenticated(isAuth);
       } catch (error) {
         console.error('Error checking authentication:', error);
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
@@ -39,8 +43,27 @@ const Middleware = () => {
     return <div>Loading...</div>;
   }
 
-  if (isAuthenticated && isLoginOrRegisterPage) {
-    return <Navigate to="/" replace />;
+  if (isAuthenticated) {
+    if (isLoginOrRegisterPage) {
+      return <Navigate to="/" replace />;
+    }
+
+    if (isAssignTaskPage && role !== 'admin') {
+      return <Navigate to="/" replace />;
+    }
+
+    if (isViewTasksPage && role !== 'user') {
+      return <Navigate to="/" replace />;
+    }
+
+    if (isHomePage) {
+      if (role === 'admin') {
+        return <Navigate to="/assign-task" replace />;
+      }
+      if (role === 'user') {
+        return <Navigate to="/view-tasks" replace />;
+      }
+    }
   }
 
   if (!isAuthenticated && !isLoginOrRegisterPage) {
