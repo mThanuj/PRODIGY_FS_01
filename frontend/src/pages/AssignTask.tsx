@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
 import axiosInstance from '../config/axios.config';
 import {
   assignTaskSchema,
@@ -37,7 +36,7 @@ const AssignTask: React.FC = () => {
 
   const onSubmit = async (data: AssignTaskForm) => {
     try {
-      await axios.post('/api/tasks', {
+      await axiosInstance.post('/tasks/create-task', {
         title: data.title,
         description: data.description,
         user: data.user,
