@@ -26,5 +26,17 @@ export const getTasks = async (req: Request, res: Response) => {
 };
 
 export const createTask = async (req: Request, res: Response) => {
-  res.json({ message: 'Create task' });
+  try {
+    const { title, description, user } = req.body;
+    const task: ITask = await Task.create({
+      title,
+      description,
+      user,
+    });
+
+    res.status(201).json({ task });
+  } catch (error) {
+    console.error('Error creating task:', error);
+    res.status(500).json({ error: 'Error creating task' });
+  }
 };
