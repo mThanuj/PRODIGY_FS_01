@@ -40,3 +40,30 @@ export const createTask = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Error creating task' });
   }
 };
+
+export const completeTask = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { id: userId, role } = req.user as { id: string; role: string };
+
+    if (role !== 'admin' && userId !== id) {
+      res
+        .status(403)
+        .json({ error: 'You are not authorized to complete this task' });
+      return;
+    }
+
+    const task: ITask | null = await Task.findById({ _id: id, user: userId });
+    if (!task) {
+      res.status(404).json({ error: 'Task not found' });
+      return;
+    }
+
+    task.isDone = true;
+    await task.save();
+    res.status(200).json({ task });
+  } catch (error) {
+    console.error('Error completing task:', error);
+    res.status(500).json({ error: 'Error completing task' });
+  }
+};
