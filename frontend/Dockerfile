@@ -1,13 +1,22 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
+# Enable corepack and prepare pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Set working directory
 WORKDIR /usr/frontend/dev
 
-COPY package.json ./
+# Copy only essential files first for better caching
+COPY package.json pnpm-lock.yaml ./
 
-RUN npm install
+# Install dependencies using pnpm
+RUN pnpm install
 
+# Copy the rest of the application
 COPY . .
 
+# Expose Vite default port
 EXPOSE 5173
 
-CMD ["npm", "run", "dev"]
+# Start development server
+CMD ["pnpm", "dev"]
