@@ -8,6 +8,7 @@ export const authenticateToken = async (
   next: NextFunction,
 ) => {
   const token = req.cookies.token;
+  console.log(token);
 
   if (!token) {
     res.sendStatus(401);
@@ -19,7 +20,8 @@ export const authenticateToken = async (
     config.JWT_SECRET,
     (err: VerifyErrors | null, decoded: string | JwtPayload | undefined) => {
       if (err) {
-        return res.sendStatus(403);
+        res.sendStatus(403);
+        return;
       }
       req.user = decoded;
       next();
