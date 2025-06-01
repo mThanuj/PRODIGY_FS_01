@@ -16,7 +16,7 @@ export const getTasks = async (req: Request, res: Response) => {
 
     const tasks: ITask[] = await Task.find({
       user: id,
-    });
+    }).sort({ createdAt: -1 });
 
     res.status(200).json({ tasks });
   } catch (error) {
