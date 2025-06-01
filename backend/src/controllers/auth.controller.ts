@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import User from '../models/user.model';
+import User, { IUser } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../config/config';
@@ -12,7 +12,9 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
-    const userExists = await User.findOne({ $or: [{ name }, { email }] });
+    const userExists: IUser | null = await User.findOne({
+      $or: [{ name }, { email }],
+    });
 
     if (userExists) {
       res.status(400).json({ error: 'User already exists' });
@@ -21,7 +23,7 @@ export const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    const user: IUser = await User.create({
       name,
       email,
       password: hashedPassword,
@@ -47,7 +49,7 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    const user = await User.findOne({ email });
+    const user: IUser | null = await User.findOne({ email });
     if (!user) {
       res.status(401).json({ error: 'Invalid email or password' });
       return;
@@ -59,7 +61,7 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    const token = jwt.sign(
+    const token: string = jwt.sign(
       {
         userId: user._id,
         email: user.email,
