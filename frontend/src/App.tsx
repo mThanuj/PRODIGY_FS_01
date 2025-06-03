@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AssignTask from './pages/AssignTask';
 import ViewTasks from './pages/ViewTasks';
+import TaskLayout from './components/TaskLayout';
 
 const App = () => {
   return (
@@ -14,8 +15,11 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/assign-task" element={<AssignTask />} />
-          <Route path="/view-tasks" element={<ViewTasks />} />
+
+          <Route element={<TaskLayout />}>
+            <Route path="/assign-task" element={<AssignTask />} />
+            <Route path="/view-tasks" element={<ViewTasks />} />
+          </Route>
         </Route>
       </Routes>
     </Router>
