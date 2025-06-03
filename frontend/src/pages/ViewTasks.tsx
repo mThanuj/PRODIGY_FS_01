@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axiosInstance from '../config/axios.config';
+import Loading from '../components/Loading';
 
 interface Task {
   _id: string;
@@ -12,7 +13,7 @@ interface Task {
 
 const ViewTasks: React.FC = () => {
   const { user } = useOutletContext<{
-    user: { id: string; email: string; role: string };
+    user: { id: string; email: string; role: string } | null;
   }>();
 
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -22,6 +23,10 @@ const ViewTasks: React.FC = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
+      if (!user) {
+        return;
+      }
+
       try {
         const response = await axiosInstance.get<{ tasks: Task[] }>(
           `/tasks/${user.id}`,
@@ -36,7 +41,7 @@ const ViewTasks: React.FC = () => {
     };
 
     fetchTasks();
-  }, [user.id]);
+  }, [user]);
 
   const completeTask = async (taskId: string) => {
     if (updatingIds.has(taskId)) return;
@@ -60,11 +65,7 @@ const ViewTasks: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-gray-600 text-lg">Loading tasks...</div>
-      </div>
-    );
+    return <Loading text="Loading tasks..." />;
   }
 
   if (error) {
@@ -78,7 +79,7 @@ const ViewTasks: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen w-full bg-gray-50 py-8 px-4">
       <div className="max-w-3xl mx-auto">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
           Your Tasks

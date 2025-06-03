@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import axiosInstance from '../config/axios.config';
+import Loading from './Loading';
 
 const Middleware = () => {
   const location = useLocation();
@@ -28,7 +29,6 @@ const Middleware = () => {
         const isAuth = response.status !== 401;
 
         if (isAuth) {
-          console.log(response.data.user);
           const { email, userId: id, role } = response.data.user;
           setUser({ email, id, role });
         }
@@ -46,7 +46,7 @@ const Middleware = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading fullScreen text="Checking authentication…" />;
   }
 
   if (isAuthenticated) {
